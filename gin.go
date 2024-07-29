@@ -192,7 +192,9 @@ var _ IRouter = (*Engine)(nil)
 // - UnescapePathValues:     true
 func New(opts ...OptionFunc) *Engine {
 	debugPrintWARNINGNew()
+	// 创建 gin Engine 实例
 	engine := &Engine{
+		// 路由组实例
 		RouterGroup: RouterGroup{
 			Handlers: nil,
 			basePath: "/",
@@ -209,13 +211,15 @@ func New(opts ...OptionFunc) *Engine {
 		RemoveExtraSlash:       false,
 		UnescapePathValues:     true,
 		MaxMultipartMemory:     defaultMultipartMemory,
-		trees:                  make(methodTrees, 0, 9),
-		delims:                 render.Delims{Left: "{{", Right: "}}"},
-		secureJSONPrefix:       "while(1);",
-		trustedProxies:         []string{"0.0.0.0/0", "::/0"},
-		trustedCIDRs:           defaultTrustedCIDRs,
+		// 9 棵路由压缩前缀树，对应 9 种 http 方法
+		trees:            make(methodTrees, 0, 9),
+		delims:           render.Delims{Left: "{{", Right: "}}"},
+		secureJSONPrefix: "while(1);",
+		trustedProxies:   []string{"0.0.0.0/0", "::/0"},
+		trustedCIDRs:     defaultTrustedCIDRs,
 	}
 	engine.RouterGroup.engine = engine
+	// gin.Context 对象池
 	engine.pool.New = func() any {
 		return engine.allocateContext(engine.maxParams)
 	}
@@ -659,6 +663,7 @@ func (engine *Engine) handleHTTPRequest(c *Context) {
 	// Find root of the tree for the given HTTP method
 	t := engine.trees
 	for i, tl := 0, len(t); i < tl; i++ {
+		// 获取对应的方法树
 		if t[i].method != httpMethod {
 			continue
 		}
